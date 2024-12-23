@@ -1,4 +1,4 @@
-/**
+/*
  *  \file probSemSharedMemSoccerGame.c (implementation file)
  *
  *  \brief Problem name: SoccerGame
@@ -83,10 +83,10 @@ int main (int argc, char *argv[])
         info;                                                                                               /* info id */
 
     /* getting log file name */
-    if(argc==2) {
-        strcpy(nFic, argv[1]);
-    }
-    else strcpy(nFic, "");
+    if(argc==2) {                   // if the programm runs with exactly one argument
+        strcpy(nFic, argv[1]);      // copies the argument into logging file
+    }               
+    else strcpy(nFic, "");          // else initializes the name of logging file as an empty string
 
     /* getting key value */
     if ((key = ftok (".", 'a')) == -1) {
@@ -95,11 +95,11 @@ int main (int argc, char *argv[])
     }
 
     /* creating and initializing the shared memory region and the log file */
-    if ((shmid = shmemCreate (key, sizeof (SHARED_DATA))) == -1) { 
-        perror ("error on creating the shared memory region");
+    if ((shmid = shmemCreate (key, sizeof (SHARED_DATA))) == -1) {      // if the creation of the shared memory fails 
+        perror ("error on creating the shared memory region");          // exits the program
         exit (EXIT_FAILURE);
     }
-    if (shmemAttach (shmid, (void **) &sh) == -1) { 
+    if (shmemAttach (shmid, (void **) &sh) == -1) {                     // if the attaching fails, exits 
         perror ("error on mapping the shared region on the process address space");
         exit (EXIT_FAILURE);
     }
@@ -110,16 +110,16 @@ int main (int argc, char *argv[])
     /* initialize problem internal status */
     int p;
     for (p = 0; p < NUMPLAYERS; p++) {
-        sh->fSt.st.playerStat[p]        = ARRIVING;                            /* the players are arriving */
+        sh->fSt.st.playerStat[p]        = ARRIVING;          // loop to iterate through all players, setting their status to arriving
     }
     int g;
     for (g = 0; g < NUMGOALIES; g++) {
-        sh->fSt.st.goalieStat[g]        = ARRIVING;                            /* the goalies are arriving */
+        sh->fSt.st.goalieStat[g]        = ARRIVING;          // similar to the players loop
     }
-    sh->fSt.st.refereeStat = ARRIVINGR;                                               /*referee is arriving*/
+    sh->fSt.st.refereeStat = ARRIVINGR;                      /*referee is arriving*/
     
-    sh->fSt.nPlayers         = NUMPLAYERS;                                              
-    sh->fSt.nGoalies         = NUMGOALIES;
+    sh->fSt.nPlayers         = NUMPLAYERS;                  // initialize counters and ids                          
+    sh->fSt.nGoalies         = NUMGOALIES;                 
     sh->fSt.playersArrived   = 0;                                             
     sh->fSt.goaliesArrived   = 0;                                             
     sh->fSt.playersFree      = 0;                                             
@@ -127,18 +127,18 @@ int main (int argc, char *argv[])
     sh->fSt.teamId           = 1;                                             
 
     /* create log file */
-    createLog (nFic, &sh->fSt);                                  
-    saveState(nFic,&sh->fSt);
+    createLog (nFic, &sh->fSt);                             // crete a log file to record the program execution and system state
+    saveState(nFic,&sh->fSt);                               // save the current state to the log for record keeping
 
     /* initialize semaphore ids */
-    sh->mutex                       = MUTEX;                                /* mutual exclusion semaphore id */
+    sh->mutex                       = MUTEX;                /* mutual exclusion semaphore id */
     sh->playersWaitTeam             = PLAYERSWAITTEAM;
     sh->goaliesWaitTeam             = GOALIESWAITTEAM;
     sh->playersWaitReferee          = PLAYERSWAITREFEREE;
     sh->playersWaitEnd              = PLAYERSWAITEND;
     sh->refereeWaitTeams            = REFEREEWAITTEAMS;
     sh->playerRegistered            = PLAYERREGISTERED;
-    sh->playing                     = PLAYING;
+    sh->playing                     = PLAYING;                  
  
      /* creating and initializing the semaphore set */
     if ((semgid = semCreate (key, SEM_NU)) == -1) { 

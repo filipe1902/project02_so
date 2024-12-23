@@ -56,7 +56,8 @@ typedef struct
     /** \brief number of goalies that arrived and are free (no team) */
     int goaliesFree;
 
-    /** \brief id of team that will be formed next - initial value=1 */
+    // Quando a equipa 1 formar, esta variável teamId incrementa para 2. Este processo tem de ser feito por nós
+    /** \brief id of team that will be formed next - initial value=1 */    
     int teamId;
 
 } FULL_STAT;
