@@ -188,7 +188,6 @@ static int goalieConstituteTeam (int id)
             
             sh->fSt.st.goalieStat[id] = FORMING_TEAM;
             sh->fSt.goaliesFree -= NUMTEAMGOALIES;
-            sh->fSt.playersFree -= NUMTEAMPLAYERS;
 
             for (int i = 0; i < NUMTEAMPLAYERS; i++) {
 
@@ -197,16 +196,20 @@ static int goalieConstituteTeam (int id)
                     perror("error on the up operation for semaphore access (GL)");
                     exit(EXIT_FAILURE);
                 }
+            }
 
+            for (int i = 0; i < NUMTEAMPLAYERS; i++) {
                 // Decrement the semaphore value to indicate player as been registered
                 if (semDown(semgid, sh->playerRegistered) == -1) {
                     perror("error on the up operation for semaphore access (GL)");
                     exit(EXIT_FAILURE);
                 }
-
-                ret = sh->fSt.teamId++;
-                saveState(nFic, &sh->fSt);
             }
+
+            sh->fSt.playersFree -= NUMTEAMPLAYERS;
+            ret = sh->fSt.teamId++;
+            saveState(nFic, &sh->fSt);
+
         } else {
             sh->fSt.st.goalieStat[id] = WAITING_TEAM;
             saveState(nFic, &sh->fSt);
@@ -214,6 +217,7 @@ static int goalieConstituteTeam (int id)
     } else {
         ret = 0;
         sh->fSt.st.goalieStat[id] = LATE;
+        sh->fSt.goaliesFree--;
         saveState(nFic, &sh->fSt);
     }
     
@@ -275,6 +279,7 @@ static void waitReferee (int id, int team)
     } else if (team == 2) {
         sh->fSt.st.goalieStat[id] = WAITING_START_2;
     }
+
     saveState(nFic,&sh->fSt);
 
     if (semUp (semgid, sh->mutex) == -1) {                                                         /* exit critical region */
@@ -315,6 +320,7 @@ static void playUntilEnd (int id, int team)
     } else if (team == 2) {
         sh->fSt.st.goalieStat[id] = PLAYING_2;
     }
+    
     saveState(nFic, &sh->fSt);
 
     if (semUp (semgid, sh->mutex) == -1) {                                                         /* exit critical region */

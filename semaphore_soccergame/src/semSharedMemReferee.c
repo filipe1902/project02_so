@@ -190,7 +190,6 @@ static void waitForTeams ()
             exit(EXIT_FAILURE);
         }
     }
-
 }
 
 /**
@@ -217,10 +216,8 @@ static void startGame ()
         exit (EXIT_FAILURE);
     }
 
-    /* TODO: insert your code here */
-
     //percorremos cada player das 2 equipas (10) e por cada um metemos o semaforo up
-    for (int i = 0; i < NUMPLAYERS; i++) {
+    for (int i = 0; i < 2 * (NUMTEAMGOALIES + NUMTEAMPLAYERS); i++) {
         if (semUp(semgid, sh->playersWaitReferee) == -1) {
             perror("error on the up operation for semaphore access (PL)");
             exit(EXIT_FAILURE);
@@ -228,12 +225,12 @@ static void startGame ()
     }
 
     //meter o semaforo down para quando esta playing, igual ao de cima em vez do playerswaitreferee meto playing
-    for (int i = 0; i < NUMPLAYERS; i++) {
-        if (semDown(semgid, sh->playing) == -1) {
-            perror("error on the down operation for semaphore access (PL)");
-            exit(EXIT_FAILURE);
-        }
-    }
+    //for (int i = 0; i < NUMPLAYERS; i++) {
+    //    if (semDown(semgid, sh->playing) == -1) {
+    //        perror("error on the down operation for semaphore access (PL)");
+    //        exit(EXIT_FAILURE);
+    //    }
+    //}
 }
 
 /**
