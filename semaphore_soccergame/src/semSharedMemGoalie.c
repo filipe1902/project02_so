@@ -184,8 +184,11 @@ static int goalieConstituteTeam (int id)
     if (sh->fSt.goaliesArrived <= 2 * NUMTEAMGOALIES) {
 
         // If the number of free players is more than 4 and the number of free goalies is more than the number of goalies need in 1 team
-        if (sh->fSt.playersFree >= 4 && sh->fSt.goaliesFree >= NUMTEAMGOALIES) {
+        if (sh->fSt.playersFree >= NUMTEAMPLAYERS && sh->fSt.goaliesFree >= NUMTEAMGOALIES) {
+            
             sh->fSt.st.goalieStat[id] = FORMING_TEAM;
+            sh->fSt.goaliesFree -= NUMTEAMGOALIES;
+            sh->fSt.playersFree -= NUMTEAMPLAYERS;
 
             for (int i = 0; i < NUMTEAMPLAYERS; i++) {
 
@@ -201,7 +204,6 @@ static int goalieConstituteTeam (int id)
                     exit(EXIT_FAILURE);
                 }
 
-                sh->fSt.playersFree -= NUMTEAMPLAYERS;
                 ret = sh->fSt.teamId++;
                 saveState(nFic, &sh->fSt);
             }

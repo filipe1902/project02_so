@@ -185,7 +185,7 @@ static int playerConstituteTeam (int id)
     sh->fSt.playersArrived++;   //incrementar o contador de jogadores que chegaram ao jogo
     sh->fSt.playersFree++;      //incrementar o contador de jogadores sem equipa (free)
 
-    if (sh->fSt.playersArrived <= 8) {
+    if (sh->fSt.playersArrived <= 2 * NUMTEAMPLAYERS) {
         if (sh->fSt.playersFree >= NUMTEAMPLAYERS && sh->fSt.goaliesFree >= NUMGOALIES) {
             
             //jogador é capitão
