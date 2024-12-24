@@ -180,13 +180,12 @@ static int playerConstituteTeam (int id)
         exit (EXIT_FAILURE);
     }
 
-
     sh->fSt.playersArrived++;   //incrementar o contador de jogadores que chegaram ao jogo
     sh->fSt.playersFree++;      //incrementar o contador de jogadores sem equipa (free)
 
     if (sh->fSt.playersArrived <= 2 * NUMTEAMPLAYERS) {
         
-        if (sh->fSt.playersFree >= NUMTEAMPLAYERS && sh->fSt.goaliesFree >= NUMGOALIES) {
+        if (sh->fSt.playersFree >= NUMTEAMPLAYERS && sh->fSt.goaliesFree >= NUMTEAMGOALIES) {
             
             //jogador é capitão
             sh->fSt.st.playerStat[id] = FORMING_TEAM;
