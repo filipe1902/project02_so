@@ -285,5 +285,4 @@ static void endGame ()
             exit(EXIT_FAILURE);
         }
     }
-
 }
