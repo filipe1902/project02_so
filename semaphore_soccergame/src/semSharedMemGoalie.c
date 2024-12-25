@@ -183,7 +183,7 @@ static int goalieConstituteTeam (int id)
     // If the number of goalies that arrived is less than the number of goalies need in 2 teams
     if (sh->fSt.goaliesArrived <= 2 * NUMTEAMGOALIES) {
 
-        // If the number of free players is more than 4 and the number of free goalies is more than the number of goalies need in 1 team
+        // If the number of free players is more than 4 and the number of free goalies is more than the number of goalies is 1 
         if (sh->fSt.playersFree >= NUMTEAMPLAYERS && sh->fSt.goaliesFree >= NUMTEAMGOALIES) {
             
             sh->fSt.st.goalieStat[id] = FORMING_TEAM;

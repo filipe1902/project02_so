@@ -180,62 +180,63 @@ static int playerConstituteTeam (int id)
         exit (EXIT_FAILURE);
     }
 
-    sh->fSt.playersArrived++;   //incrementar o contador de jogadores que chegaram ao jogo
-    sh->fSt.playersFree++;      //incrementar o contador de jogadores sem equipa (free)
+    sh->fSt.playersArrived++;   // Increment the number of players that have arrived
+    sh->fSt.playersFree++;      // Increment the number of players without a team
 
+    // If there are less players than the necessary number to form 2 teams:
     if (sh->fSt.playersArrived <= 2 * NUMTEAMPLAYERS) {
         
+        // If there are enough players and a goalie to form a team:
         if (sh->fSt.playersFree >= NUMTEAMPLAYERS && sh->fSt.goaliesFree >= NUMTEAMGOALIES) {
             
-            //jogador é capitão
+            // In this case: a player is the captain
             sh->fSt.st.playerStat[id] = FORMING_TEAM;
-            saveState(nFic, &sh->fSt);
 
+            // For each player, except the captain
+            for (int i = 0; i < NUMTEAMPLAYERS - 1; i++) {     
 
-            //vamos começar a trabalhar com os semaforos
-            //colocar sem up para os os jogadores menos o capitao (só 3)
-
-            for (int i = 0; i < NUMTEAMPLAYERS - 1; i++) {      //vou libertar os outros jogadores
+                // Signal the waiting player to proceed
                 if (semUp(semgid, sh->playersWaitTeam) == -1) {
                     perror("error on the up operation for semaphore access (PL)");
                     exit(EXIT_FAILURE);
                 }
 
-
+                // The captain waits for the player to confirm is registration
                 if (semDown(semgid, sh->playerRegistered) == -1) {
                     perror("error on the down operation for semaphore access (PL)");
                     exit(EXIT_FAILURE);
                 }
             }
 
-            sh->fSt.playersFree -= NUMTEAMPLAYERS;
-            //meter o sem up que porque guarda redes veio para a equipa
+            sh->fSt.playersFree -= NUMTEAMPLAYERS;      // Decrement the number of free players
 
-            //metemos o sem down para irmos registar os jogadores da equipa, sem o capitao pois forma a equipa
-            if (semUp(semgid, sh->goaliesWaitTeam) == -1) { //libertar o guarda redes
+            // Signal the waiting goalie to proceed
+            if (semUp(semgid, sh->goaliesWaitTeam) == -1) { 
                 perror("error on the up operation for semaphore access (GL)");
                 exit(EXIT_FAILURE);
             }
 
+            // The captain waits for the goalie to confirm is registration
             if (semDown(semgid, sh->playerRegistered) == -1) {
                 perror("error on the down operation for semaphore access (PL)");
                 exit(EXIT_FAILURE);
             }
             
-            //acabaram os semaforos
+            sh->fSt.goaliesFree -= NUMTEAMGOALIES;      // Decrement the number of free goalies
+            ret = sh->fSt.teamId++;                     // Change to the next team
+            saveState(nFic, &sh->fSt); 
 
-            sh->fSt.goaliesFree -= NUMTEAMGOALIES;
-            ret = sh->fSt.teamId++;
-            saveState(nFic, &sh->fSt); // guardamos o estado do capitão como forming team
-
+        // If there are not enough players to form a team:
         } else {
-            sh->fSt.st.playerStat[id] = WAITING_TEAM;  //o jogador vai esperar para formar equipa
+            sh->fSt.st.playerStat[id] = WAITING_TEAM; 
             saveState(nFic, &sh->fSt);
         }
+
+    // If there are more than the necessary number of players for 2 teams:
     } else {
         ret = 0;
-        sh->fSt.st.playerStat[id] = LATE;  //jogador chega atrasado
-        sh->fSt.playersFree--;
+        sh->fSt.st.playerStat[id] = LATE;  
+        sh->fSt.playersFree--;              // Decrement the number of free players
         saveState(nFic, &sh->fSt);
     }
 
@@ -244,25 +245,27 @@ static int playerConstituteTeam (int id)
         exit (EXIT_FAILURE);
     }
 
-
-    /* TODO: insert your code here */
+    // If the player is waiting for a team to be formed:
     if (sh->fSt.st.playerStat[id] == WAITING_TEAM) {
 
-        //semaforos para um player que nao seja capitao
+        // Confirm that one player is waiting for a team to be formed
         if (semDown(semgid, sh->playersWaitTeam) == -1) { 
             perror ("error on the down operation for semaphore access (PL)");                                    
             exit(EXIT_FAILURE);
         }
 
-        ret = sh->fSt.teamId; //id da equipa como valor de retorno
+        ret = sh->fSt.teamId;               // Return the current team's ID
 
+        // Confirm one player as been registered
         if (semUp(semgid, sh->playerRegistered) == -1) {
             perror ("error on the up operation for semaphore access (PL)");
             exit(EXIT_FAILURE);
         }
 
+    // If the player is forming a team:
     } else if (sh->fSt.st.playerStat[id] == FORMING_TEAM) {
-        //agora semaforo para jogador que é capitao
+        
+        // Signals the referee to proceed 
         if (semUp(semgid, sh->refereeWaitTeams) == -1) {
             perror ("error on the up operation for semaphore access (RF)");
             exit(EXIT_FAILURE);
@@ -326,16 +329,16 @@ static void playUntilEnd (int id, int team)
         exit (EXIT_FAILURE);
     }
 
-    if (semUp(semgid, sh->playing) == -1) {                                      
-        perror("error on the up operation for semaphore access (PL)");
-        exit(EXIT_FAILURE);
-    }
-
     if (team == 1) {
         sh->fSt.st.playerStat[id] = PLAYING_1;
     } else if (team == 2) {
         sh->fSt.st.playerStat[id] = PLAYING_2;
     }  
+
+    if (semUp(semgid, sh->playing) == -1) {                                      
+        perror("error on the up operation for semaphore access (PL)");
+        exit(EXIT_FAILURE);
+    }
 
     saveState(nFic, &sh->fSt);
 
@@ -348,7 +351,6 @@ static void playUntilEnd (int id, int team)
         perror("error on the down operation for semaphore access (PL)");
         exit(EXIT_FAILURE);
     }
-
 }
 
 

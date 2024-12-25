@@ -142,7 +142,6 @@ static void arrive ()
         exit (EXIT_FAILURE);
     }
 
-    /* TODO: insert your code here */
 
     //primeiro atualizo o estado e depois salvo
     sh->fSt.st.refereeStat = ARRIVING;
@@ -167,7 +166,7 @@ static void arrive ()
 static void waitForTeams ()
 {
     if (semDown (semgid, sh->mutex) == -1) {                                                      /* enter critical region */
-        perror ("error on the up operation for semaphore access (RF)");
+        perror ("error on the down operation for semaphore access (RF)");
         exit (EXIT_FAILURE);
     }
 
@@ -225,12 +224,12 @@ static void startGame ()
     }
 
     //meter o semaforo down para quando esta playing, igual ao de cima em vez do playerswaitreferee meto playing
-    //for (int i = 0; i < NUMPLAYERS; i++) {
-    //    if (semDown(semgid, sh->playing) == -1) {
-    //        perror("error on the down operation for semaphore access (PL)");
-    //        exit(EXIT_FAILURE);
-    //    }
-    //}
+    for (int i = 0; i < NUMPLAYERS; i++) {
+        if (semDown(semgid, sh->playing) == -1) {
+            perror("error on the down operation for semaphore access (PL)");
+            exit(EXIT_FAILURE);
+        }
+    }
 }
 
 /**
