@@ -142,8 +142,7 @@ static void arrive ()
         exit (EXIT_FAILURE);
     }
 
-
-    //primeiro atualizo o estado e depois salvo
+    // Update and save referee state
     sh->fSt.st.refereeStat = ARRIVING;
     saveState(nFic, &sh->fSt);
 
@@ -170,8 +169,7 @@ static void waitForTeams ()
         exit (EXIT_FAILURE);
     }
 
-    /* TODO: insert your code here */
-    sh->fSt.st.refereeStat = WAITING_TEAMS;     //atualizar o estado
+    sh->fSt.st.refereeStat = WAITING_TEAMS;     
     saveState(nFic, &sh->fSt);
 
     if (semUp (semgid, sh->mutex) == -1) {                                                        /* leave critical region */
@@ -179,11 +177,10 @@ static void waitForTeams ()
         exit (EXIT_FAILURE);
     }
 
-    /* TODO: insert your code here */
-    // vou meter 2 vezes o semaforo down
-    //porque temos que esperar por 2 equipas
-
+    // For each team:
     for (int i = 0; i < 2; i++) {
+
+        // Confirms both teams have been formed
         if (semDown(semgid, sh->refereeWaitTeams) == -1) {
             perror("error on the down operation for semaphore access (RF)");
             exit(EXIT_FAILURE);
@@ -205,8 +202,6 @@ static void startGame ()
         exit (EXIT_FAILURE);
     }
 
-    /* TODO: insert your code here */
-    //atualizar o estado para o starting_game
     sh->fSt.st.refereeStat = STARTING_GAME;
     saveState(nFic, &sh->fSt);
 
@@ -215,15 +210,17 @@ static void startGame ()
         exit (EXIT_FAILURE);
     }
 
-    //percorremos cada player das 2 equipas (10) e por cada um metemos o semaforo up
+    // For each player in a team:
     for (int i = 0; i < 2 * (NUMTEAMGOALIES + NUMTEAMPLAYERS); i++) {
+
+        // Signal the players and goalies the game is starting
         if (semUp(semgid, sh->playersWaitReferee) == -1) {
             perror("error on the up operation for semaphore access (PL)");
             exit(EXIT_FAILURE);
         }
     }
 
-    //meter o semaforo down para quando esta playing, igual ao de cima em vez do playerswaitreferee meto playing
+    // Confirm the referee the players are ready
     for (int i = 0; i < NUMPLAYERS; i++) {
         if (semDown(semgid, sh->playing) == -1) {
             perror("error on the down operation for semaphore access (PL)");
@@ -246,8 +243,6 @@ static void play ()
         exit (EXIT_FAILURE);
     }
 
-    /* TODO: insert your code here */
-    //atualizar o estado para o arbitro estar a arbitrar
     sh->fSt.st.refereeStat = REFEREEING;
     saveState(nFic, &sh->fSt);
 
@@ -273,8 +268,6 @@ static void endGame ()
         exit (EXIT_FAILURE);
     }
 
-    /* TODO: insert your code here */
-    //atualizar o estado para fim do jogo
     sh->fSt.st.refereeStat = ENDING_GAME;
     saveState(nFic, &sh->fSt);
 
@@ -283,9 +276,10 @@ static void endGame ()
         exit (EXIT_FAILURE);
     }
 
-    /* TODO: insert your code here */
-    //percorrer todos os jogadores das 2 equipas (10) para meter semUp no playersWaitEnd (fim do jogo)
+    // For each player:
     for (int i = 0; i < NUMPLAYERS; i++) {
+
+        // Signal the players the game has ended
         if (semUp(semgid, sh->playersWaitEnd) == -1) {
             perror("error on the up operation for semaphore access (PL)");
             exit(EXIT_FAILURE);
